@@ -1,6 +1,6 @@
 <template>
-	<div class="card material-table">
-		<div class="table-header">
+	<div class="material-table">
+		<div class="table-header responsive-table">
 			<span class="table-title">{{title}}</span>
 			<div class="actions">
 				<a v-for="(button, index) in customButtons" href="javascript:undefined"
@@ -40,12 +40,12 @@
 				</label>
 			</div>
 		</div>
-		<table ref="table">
+		<table ref="table" class="responsive-table">
 			<thead>
 				<tr>
 					<th v-for="(column, index) in columns"
 						:key="index"
-						@click="sort(index)"
+						@click="sort(ind)"
 						:class="(sortable ? 'sorting ' : '')
 							+ (sortColumn === index ?
 								(sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
@@ -62,19 +62,19 @@
 				<tr v-for="(row, index) in paginated" :class="{ clickable : clickable }" :key="index" @click="click(row)">
 					<td v-for="column in columns" :class=" { numeric : column.numeric } " :key="index">
 						<div v-if="!column.html"> {{ collect(row, column.field) }} </div>
-						<div v-if="column.html" v-html="collect(row, column.field)"></div>						
+						<div v-if="column.html" v-html="collect(row, column.field)"></div>	
 					</td>
 					<slot name="tbody-tr" :row="row"></slot>
 				</tr>
 			</tbody>
 		</table>
 
-		<div class="table-footer" v-if="paginate">
+		<div class="table-footer hide-on-small-only" v-if="paginate">
 			<div :class="{'datatable-length': true, 'rtl': lang.__is_rtl}">
 				<label>
 					<span>{{lang['rows_per_page']}}:</span>
 					<select class="browser-default" @change="onTableLength">
-						<option v-for="option in perPageOptions" :value="option" :selected="option == currentPerPage" :key="index">
+						<option v-for="(option, index) in perPageOptions" :value="option" :selected="option == currentPerPage" :key="index">
 						{{ option === -1 ? lang['all'] : option }}
 					  </option>
 					</select>
@@ -128,17 +128,10 @@
 				type: Boolean,
 				default: false
 			},
-			serverSearch: {
-				type: Boolean,
-				default: false
-			},
-			serverSearchFunc: {
-				type: Function
-			},
 			paginate: {default: true},
 			exportable: {default: true},
 			printable: {default: true},
-			locale: {default: 'en'}
+			locale: {default: 'en'},
 		},
 
 		data: () => ({
@@ -147,7 +140,7 @@
 			sortColumn: -1,
 			sortType: 'asc',
 			searching: false,
-			searchInput: '',
+			searchInput: ''
 		}),
 
 		methods: {
@@ -320,12 +313,6 @@
 					})
 
 				if (this.searching && this.searchInput) {
-
-					if(this.serverSearch) {
-						this.serverSearchFunc(this.searchInput)
-						return
-					}
-
 					const searchConfig = { keys: this.columns.map(c => c.field) }
 
 					// Enable searching of numbers (non-string)
